@@ -32,13 +32,12 @@
 
 
 (defun pomodoro-tick(time complete-message)
-  (lexical-let ((pomodoro-minute -1)
+  (lexical-let ((pomodoro-minute 0)
                 (max-time time)
                 (finish-message complete-message))
     #'(lambda ()
         (incf pomodoro-minute)
-        (pomodoro-log-to-buffer "Current pomodoro minute: ")
-        (when (>= pomodoro-minute max-time)
+        (when (> pomodoro-minute max-time)
           (pomodoro-log-to-buffer finish-message pomodoro-task)
           (setq pomodoro-in-progress nil)
           (cancel-timer pomodoro-timer)
