@@ -5,6 +5,7 @@
 
 ;; Have to be able to define a set of tasks
 ;; Have the ability to look up tasks from org-mode
+;; Ability to record distractions
 ;; ability to update an org-mode file entry with pomodoro.
 ;; Ability to update pomodoro-buffer
 ;; Function to update the existing mode line
