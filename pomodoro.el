@@ -48,7 +48,7 @@
          (map-functions ,start-functions)
          (setq pomodoro-timer 
                (run-at-time 0
-                            1
+                            60
                             (pomodoro-tick ,max-size 
                                            ,tick-functions
                                            (append (list #'generic-cleanup-function)
