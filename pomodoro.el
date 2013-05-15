@@ -21,25 +21,38 @@
 (defvar pomodoro-task nil)
 (defvar pomodoro-timer nil)
 
-(defconst pomodoro-max-size 25)
-(defconst pomodoro-short-break-size 5)
-(defconst pomodoro-long-break-size 15)
+(defconst pomodoro-default-max-size 25)
+(defconst pomodoro-default-short-break-size 5)
+(defconst pomodoro-default-long-break-size 15)
 
-(defmacro pomodoro-timer-template(pomodoro-task-string max-size tick-functions complete-functions)
-  "Macro for a pomodoro timer, checks if a timer is active, if not then sets a timer."
-  `(if (null pomodoro-timer)
-       (progn
-         (setq pomodoro-task ,pomodoro-task)
-         (setq pomodoro-timer (run-at-time 0
-                                           60
-                                           (pomodoro-tick ,max-size ,tick-function ,complete-functions))))
-     (pomodoro-log-to-buffer "There is a timer already running")))
+(defvar pomodoro-max-size 25)
+(defvar pomodoro-short-break-size 5)
+(defvar pomodoro-long-break-size 15)
+
+(defvar pomodoro-custom-on-start-functions '())
+(defvar pomodoro-custom-on-complete-functions '())
+(defvar pomodoro-custom-on-tick-functions '())
 
 (defun map-functions(function-list)
   "Function to map across a list of functions."
   (mapcar #'(lambda(function)
               (funcall function))
           function-list))
+
+(defmacro pomodoro-timer-template(max-size start-functions tick-functions complete-functions)
+  "Macro for a pomodoro timer, checks if a timer is active, if not then sets a timer."
+  `(if (null pomodoro-timer)
+       (progn
+         (setq pomodoro-task ,pomodoro-task)
+         (map-functions ,start-functions)
+         (setq pomodoro-timer 
+               (run-at-time 0
+                            1
+                            (pomodoro-tick ,max-size 
+                                           ,tick-functions
+                                           (append (list #'generic-cleanup-function)
+                                                   ,complete-functions)))))
+     (pomodoro-log-to-buffer "There is a timer already running")))
 
 (defun pomodoro-tick(time tick-functions complete-functions)
   "Function that provides the ticking..."
@@ -52,7 +65,14 @@
         (pomodoro-log-to-buffer "Tick")
         (map-functions on-tick-functions)
         (when (> pomodoro-minute max-time)
-          (map-functions end-functions)))))
+          (map-functions on-complete-functions)))))
+
+(defun pomodoro-message (msg)
+  "Function to write to the pomodoro buffer, just a wrapper, so that I don't have to write lambdas everywhere."
+  (lexical-let ((message msg))
+    #'(lambda()
+        (pomodoro-log-to-buffer message))))
+             
 
 ;; Called when a timer is up
 (defun generic-cleanup-function()
@@ -63,32 +83,31 @@
 (defun pomodoro-start(task)
   "Function that starts a pomodoro"
   (interactive "MTask Name:")
-  (pomodoro-timer-template task
-                           2
-                           '()
-                           (list #'generic-cleanup-function
-                                 #'(lambda()
-                                     (pomodoro-log-to-buffer "Completed Task: " task)))))
+  (pomodoro-timer-template 2
+                           (cons (pomodoro-message (concat "Starting pomodoro for: " task)) 
+                                 pomodoro-custom-on-start-functions)
+                           pomodoro-custom-on-tick-functions
+                           (cons (pomodoro-message (concat "Completed Task:" task))
+                                 pomodoro-custom-on-complete-functions)))
 
 ;; function to control break
 (defun pomodoro-short-break()
   "Function that controls a short break"
   (interactive)
-  (pomodoro-timer-template ""
-                           pomodoro-short-break-size
-                           '()
-                           (list #'generic-cleanup-function
-                                 #'(lambda()
-                                     (pomodoro-log-to-buffer "Completed Short Break")))))
+  (pomodoro-timer-template pomodoro-short-break-size
+                           pomodoro-custom-on-start-functions
+                           pomodoro-custom-on-tick-functions
+                           (append (list #'(lambda()(pomodoro-log-to-buffer "Completed Short Break")))
+                                   pomodoro-custom-on-complete-functions)))
 
 (defun pomodoro-long-break()
   "Function that controls a long break"
   (interactive)
-  (pomodoro-timer-template "" pomodoro-long-break-size 
-                           '()
-                           (list #'generic-cleanup-function                              
-                                 #'(lambda()
-                                     (pomodoro-log-to-buffer "Completed Long Break")))))
+  (pomodoro-timer-template pomodoro-long-break-size 
+                           pomodoro-custom-on-start-functions
+                           pomodoro-custom-on-tick-functions
+                           (append (list #'(lambda()(pomodoro-log-to-buffer "Completed Long Break")))
+                                   pomodoro-custom-on-complete-functions)))
 
 ;; Function to void a pomodoro
 (defun cancel-pomodoro()
