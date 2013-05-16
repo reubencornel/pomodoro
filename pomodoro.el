@@ -11,7 +11,6 @@
 ;; Function to update the existing mode line
 ;; function to reset the mode line.
 
-
 (eval-when-compile
   (require 'cl))
 
@@ -49,10 +48,10 @@
   `(if (null pomodoro-timer)
        (progn
          (map-functions ,start-functions)
-         (setq pomodoro-timer 
+         (setq pomodoro-timer
                (run-at-time 0
                             pomodoro-size-of-tick
-                            (pomodoro-tick ,max-size 
+                            (pomodoro-tick ,max-size
                                            ,tick-functions
                                            (cons #'generic-cleanup-function
                                                    ,complete-functions)))))
@@ -76,7 +75,7 @@
   (lexical-let ((message msg))
     #'(lambda()
         (pomodoro-log-to-buffer message))))
-             
+
 
 ;; Called when a timer is up
 (defun generic-cleanup-function()
@@ -121,7 +120,7 @@
   (interactive)
   (setq pomodoro-state "LB")
   (setq pomodoro-task "Long Break")
-  (pomodoro-timer-template pomodoro-long-break-size 
+  (pomodoro-timer-template pomodoro-long-break-size
                            (cons (update-mode-line) pomodoro-custom-on-start-functions)
                            (cons (update-mode-line)
                                  pomodoro-custom-on-tick-functions)
@@ -136,24 +135,23 @@
         (progn
           (delq 'pomodoro-mode-line-string global-mode-string)
           (setq pomodoro-mode-line-string ""))
-      (progn 
+      (progn
         (add-to-list 'global-mode-string 'pomodoro-mode-line-string 'append)
         (setq pomodoro-mode-line-string
-              (format " %s %02d:%02d" 
+              (format " %s %02d:%02d"
                       pomodoro-state
                       00
                       pomodoro-external-minute))))
       (force-mode-line-update)))
-                      
-               
+
+
 ;; Function to void a pomodoro
 (defun cancel-pomodoro()
   "Cancels an existing pomodoro"
   (interactive)
   (map-functions (append pomodoro-custom-on-cancel-functions
-                         (list #'generic-cleanup-function 
+                         (list #'generic-cleanup-function
                                (pomodoro-message (concat "Pomodoro cancelled for " pomodoro-task))))))
-
 
 (defun pomodoro-log-interruption(interruption)
   "This function logs an interruption to the pomodoro buffer"
@@ -169,7 +167,6 @@
       (set-buffer pomodoro-buffer)
       (goto-char (point-max))             ;
       (insert "[" (current-time-string) "]: "  (apply 'concat log-message) "\n"))))
-
 
 (defun pomodoro-create-log-buffer()
   (setq pomodoro-buffer (get-buffer-create pomodoro-buffer-name)))
