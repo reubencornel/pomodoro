@@ -54,7 +54,7 @@
                             pomodoro-size-of-tick
                             (pomodoro-tick ,max-size 
                                            ,tick-functions
-                                           (append (list #'generic-cleanup-function)
+                                           (cons #'generic-cleanup-function
                                                    ,complete-functions)))))
      (pomodoro-log-to-buffer "There is a timer already running")))
 
