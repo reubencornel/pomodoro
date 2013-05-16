@@ -5,11 +5,7 @@
 
 ;; Have to be able to define a set of tasks
 ;; Have the ability to look up tasks from org-mode
-;; Ability to record distractions
 ;; ability to update an org-mode file entry with pomodoro.
-;; Ability to update pomodoro-buffer
-;; Function to update the existing mode line
-;; function to reset the mode line.
 
 (eval-when-compile
   (require 'cl))
@@ -76,14 +72,12 @@
     #'(lambda()
         (pomodoro-log-to-buffer message))))
 
-
-;; Called when a timer is up
 (defun generic-cleanup-function()
+  "Called when a timer is up"
   (setq pomodoro-task "")
   (cancel-timer pomodoro-timer)
   (setq pomodoro-timer nil))
 
-;; a function to start a pomodoro
 (defun pomodoro-start(task)
   "Function that starts a pomodoro"
   (interactive "MTask Name:")
@@ -99,7 +93,6 @@
                                          (pomodoro-message (concat "Completed Task:" task)))
                                    pomodoro-custom-on-complete-functions)))
 
-;; function to control break
 (defun pomodoro-short-break()
   "Function that controls a short break"
   (interactive)
@@ -144,8 +137,6 @@
                       pomodoro-external-minute))))
       (force-mode-line-update)))
 
-
-;; Function to void a pomodoro
 (defun cancel-pomodoro()
   "Cancels an existing pomodoro"
   (interactive)
@@ -158,7 +149,6 @@
   (interactive "MDescribe Interruption:")
   (pomodoro-log-to-buffer "Interruption:" interruption))
 
-;; ability to log to a buffer
 (defun pomodoro-log-to-buffer(&rest log-message)
   "Logging to a pomodoro buffer, in case we need to audit this stuff later"
   (save-excursion
