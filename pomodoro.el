@@ -155,6 +155,11 @@
                                (pomodoro-message (concat "Pomodoro cancelled for " pomodoro-task))))))
 
 
+(defun pomodoro-log-interruption(interruption)
+  "This function logs an interruption to the pomodoro buffer"
+  (interactive "MDescribe Interruption:")
+  (pomodoro-log-to-buffer "Interruption:" interruption))
+
 ;; ability to log to a buffer
 (defun pomodoro-log-to-buffer(&rest log-message)
   "Logging to a pomodoro buffer, in case we need to audit this stuff later"
