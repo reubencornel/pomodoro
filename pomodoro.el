@@ -1,8 +1,27 @@
 ;;; -*- lexical-binding: t -*-
-;; Local Variables:
-;; lexical-binding: t
-;; End:
+;; Author: Reuben Cornel
+;;
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation; either version 2 of the License, or
+;; (at your option) any later version.
+;;
+;; This program is distributed in the hope that it will be useful, but
+;; WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+;; General Public License for more details.
+;;
+;; You should have received a copy of the GNU General Public License
+;; along with this program; if not, write to the Free Software
+;; Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
+;;; Commentary:
+
+;;
+
+;;; Code:
+
+;;TODO
 ;; Have to be able to define a set of tasks
 ;; Have the ability to look up tasks from org-mode
 ;; ability to update an org-mode file entry with pomodoro.
@@ -10,28 +29,25 @@
 (eval-when-compile
   (require 'cl))
 
-(defvar pomodoro-log-to-buffer t)
 (defvar pomodoro-buffer-name "*pomodoro*")
 (defvar pomodoro-buffer nil)
-(defvar pomodoro-state "") ;; LB:SB:TK
-(defvar pomodoro-task nil)
+(defvar pomodoro-state "" "Variable that keeps track of the state of the program") ;; LB:SB:TK
+(defvar pomodoro-task nil "Name of the task that is currently being executed")
 (defvar pomodoro-timer nil)
 (defvar pomodoro-mode-line-string "")
 
-(defconst pomodoro-default-max-size 25)
-(defconst pomodoro-default-short-break-size 5)
-(defconst pomodoro-default-long-break-size 15)
-(defvar pomodoro-size-of-tick 60)
-
-(defvar pomodoro-max-size 25)
+(defvar pomodoro-size-of-tick 60 "Number seconds after which the timer is set off in seconds")
+(defvar pomodoro-max-size 25 "Max time for the pomodoro in minutes")
 (defvar pomodoro-short-break-size 5)
 (defvar pomodoro-long-break-size 15)
-(defvar pomodoro-external-minute 0)
+(defvar pomodoro-time-remaining 0)
 
-(defvar pomodoro-custom-on-start-functions '())
-(defvar pomodoro-custom-on-complete-functions '())
-(defvar pomodoro-custom-on-tick-functions '())
-(defvar pomodoro-custom-on-cancel-functions '())
+(defvar pomodoro-custom-on-start-functions '() "Functions that are executed on start of the pomodoro")
+(defvar pomodoro-custom-on-complete-functions '() "Functions that are executed on complete of the timer")
+(defvar pomodoro-custom-on-tick-functions '() "Functions that are executed on every tick of the timer")
+(defvar pomodoro-custom-on-cancel-functions '() "Functions that are executed when the timer is cancelled")
+
+
 
 (defun map-functions(function-list)
   "Function to map across a list of functions."
@@ -61,7 +77,7 @@
                 (on-tick-functions tick-functions))
     #'(lambda ()
         (incf pomodoro-minute)
-        (setq pomodoro-external-minute (- max-time pomodoro-minute))
+        (setq pomodoro-time-remaining (- max-time pomodoro-minute))
         (map-functions on-tick-functions)
         (when (> pomodoro-minute max-time)
           (map-functions on-complete-functions)))))
@@ -134,7 +150,7 @@
               (format " %s %02d:%02d"
                       pomodoro-state
                       00
-                      pomodoro-external-minute))))
+                      pomodoro-time-remaining))))
       (force-mode-line-update)))
 
 (defun cancel-pomodoro()
