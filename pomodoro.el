@@ -17,9 +17,14 @@
 
 ;;; Commentary:
 
+;;; Acknowledgements
+;; I learned a lot by looking at Victor Deryagin's pomodoro.el, you can find it here
+;; https://github.com/vderyagin/pomodoro.el
+
 ;;; Code:
 
 ;;TODO
+;; Use hooks instead of functions.
 ;; Have to be able to define a set of tasks
 ;; Have the ability to look up tasks from org-mode
 ;; Ability to log pomodoros to an org mode file.
