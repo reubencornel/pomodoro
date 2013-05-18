@@ -17,14 +17,12 @@
 
 ;;; Commentary:
 
-;;
-
 ;;; Code:
 
 ;;TODO
 ;; Have to be able to define a set of tasks
 ;; Have the ability to look up tasks from org-mode
-;; ability to update an org-mode file entry with pomodoro.
+;; Ability to log pomodoros to an org mode file.
 
 (eval-when-compile
   (require 'cl))
@@ -46,7 +44,12 @@
 (defvar pomodoro-custom-on-complete-functions '() "Functions that are executed on complete of the timer")
 (defvar pomodoro-custom-on-tick-functions '() "Functions that are executed on every tick of the timer")
 (defvar pomodoro-custom-on-cancel-functions '() "Functions that are executed when the timer is cancelled")
+(defvar pomodoro-use-notify nil)
 
+
+;; If notify.el has been installed use it.
+(when (require 'notify nil 'noerror)
+  (setq pomodoro-use-notify t))
 
 
 (defun map-functions(function-list)
@@ -95,18 +98,21 @@
   (setq pomodoro-timer nil))
 
 (defun pomodoro-start(task)
-  "Function that starts a pomodoro"
   (interactive "MTask Name:")
   (setq pomodoro-task task)
+  (pomodoro))
+
+(defun pomodoro()
+  "Function that starts a pomodoro"
   (setq pomodoro-state "TK")
   (pomodoro-timer-template pomodoro-max-size
                            (append (list (update-mode-line)
-                                         (pomodoro-message (concat "Starting pomodoro for: " task)))
+                                         (pomodoro-message (concat "Starting pomodoro for: " pomodoro-task)))
                                  pomodoro-custom-on-start-functions)
                            (cons (update-mode-line)
                                  pomodoro-custom-on-tick-functions)
                            (append (list (update-mode-line)
-                                         (pomodoro-message (concat "Completed Task:" task)))
+                                         (pomodoro-message (concat "Completed Task:" pomodoro-task)))
                                    pomodoro-custom-on-complete-functions)))
 
 (defun pomodoro-short-break()
@@ -172,7 +178,14 @@
       (pomodoro-create-log-buffer)
       (set-buffer pomodoro-buffer)
       (goto-char (point-max))             ;
-      (insert "[" (current-time-string) "]: "  (apply 'concat log-message) "\n"))))
+      (insert "[" (current-time-string) "]: "  (apply 'concat log-message) "\n")
+      (if pomodoro-use-notify
+        (notify "Pomodoro Timer" log-message)))))
 
 (defun pomodoro-create-log-buffer()
   (setq pomodoro-buffer (get-buffer-create pomodoro-buffer-name)))
+
+;; Additional customization ;;
+
+
+(provide 'pomodoro)
