@@ -185,7 +185,4 @@
 (defun pomodoro-create-log-buffer()
   (setq pomodoro-buffer (get-buffer-create pomodoro-buffer-name)))
 
-;; Additional customization ;;
-
-
 (provide 'pomodoro)
