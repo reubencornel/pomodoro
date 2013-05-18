@@ -51,7 +51,6 @@
 (when (require 'notify nil 'noerror)
   (setq pomodoro-use-notify t))
 
-
 (defun map-functions(function-list)
   "Function to map across a list of functions."
   (mapcar #'(lambda(function)
