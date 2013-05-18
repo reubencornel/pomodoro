@@ -159,7 +159,7 @@
                       pomodoro-time-remaining))))
       (force-mode-line-update)))
 
-(defun cancel-pomodoro()
+(defun pomodoro-cancel()
   "Cancels an existing pomodoro"
   (interactive)
   (map-functions (append pomodoro-custom-on-cancel-functions

@@ -1,0 +1,67 @@
+Pomodoro.el
+
+* So why another version of the pomodoro timer?  
+
+  Because I felt the need to write one.
+
+* What does it do differently?
+
+  It logs its start and stop times to a buffer so that I could audit
+  what I had done. It also has a function to log interruptions to that
+  buffer. So that you are not distracted when you are working on
+  something.
+
+  Hopefully when I get time I could get it to update my org-mode
+  file.
+
+* Are there any prerequisites?
+
+  Well there are no prerequisties. If it is able to load notify.el it
+  uses the notification program on your os to notify you.
+
+* How do you install it?
+
+  Add the file to your load path. Then add (require 'pomodoro) to your init.
+
+* How do you use it?
+  
+  You can start the timer by calling
+
+  M-x pomodoro-start
+
+  This starts a timer for 25 minutes. This creates a buffer called
+  *pomodoro* that you can look at perhaps at the end of the day to see
+  how your time was spent.
+
+  Perhaps if you realize that you have to cancel the currently running pomodoro call
+
+  M-x pomodoro-cancel
+
+  If you want to start a short break after a task call
+
+  M-x pomodoro-short-break
+
+  If you want to start a long break after a task call
+
+  M-x pomodoro-long-break
+
+* How do you customize it?
+
+  You can customize the size of the pomodoro timer by customizing the values of the following variables
+
+     pomodoro-max-size: 25   
+     pomodoro-short-break-size: 5
+     pomodoro-long-break-size: 15
+
+  You can customize behaviour of the timer by adding functions the following list
+
+     pomodoro-custom-on-start-functions: Called before a pomodoro
+     timer is started.
+
+     pomodoro-custom-on-complete-functions: Called after a timer has
+     finished it time. The timer is cleared up, but the state can be
+     retrieved from the pomodoro-state variable.
+     
+     pomodoro-custom-on-tick-functions: Called during every tick of the timer.
+     
+     pomodoro-custom-on-cancel-functions: Called when the pomodoro is cancelled.
