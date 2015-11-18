@@ -52,11 +52,12 @@
 (defvar pomodoro-custom-on-tick-functions '() "Functions that are executed on every tick of the timer")
 (defvar pomodoro-custom-on-cancel-functions '() "Functions that are executed when the timer is cancelled")
 (defvar pomodoro-use-notify nil)
+(defvar pomodoro-notifier nil "Is a function that must take in two strings one the title notification and message")
 
 
-;; If notify.el has been installed use it.
-(when (require 'notify nil 'noerror)
-  (setq pomodoro-use-notify t))
+;; ;; If notify.el has been installed use it.
+;; (when (require 'notify nil 'noerror)
+;;   (setq pomodoro-use-notify t))
 
 (defun map-functions(function-list)
   "Function to map across a list of functions."
@@ -94,6 +95,8 @@
 (defun pomodoro-message (msg)
   "Function to write to the pomodoro buffer, just a wrapper, so that I don't have to write lambdas everywhere."
   (lexical-let ((message msg))
+    (if (not (null pomodoro-notifier))
+	(funcall pomodoro-notifier "Emacs Pomodoro Timer" msg))
     #'(lambda()
         (pomodoro-log-to-buffer message))))
 
