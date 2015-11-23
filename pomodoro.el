@@ -65,6 +65,15 @@
               (funcall function))
           function-list))
 
+(defun generic-cleanup-function()
+  "Called when a timer is up"
+  (setq pomodoro-task "")
+  (setq pomodoro-state "")
+  (if (not (null pomodoro-timer))
+      (cancel-timer pomodoro-timer))
+  (setq pomodoro-timer nil)
+  (funcall (update-mode-line)))
+
 (defmacro pomodoro-timer-template(max-size start-functions tick-functions complete-functions)
   "Macro for a pomodoro timer, checks if a timer is active, if not then sets a timer."
   `(if (null pomodoro-timer)
@@ -75,8 +84,8 @@
                             pomodoro-size-of-tick
                             (pomodoro-tick ,max-size
                                            ,tick-functions
-                                           (cons #'generic-cleanup-function
-                                                   ,complete-functions)))))
+                                           (append ,complete-functions
+						   (list #'generic-cleanup-function))))))
      (pomodoro-log-to-buffer "There is a timer already running")))
 
 (defun pomodoro-tick(time tick-functions complete-functions)
@@ -98,13 +107,8 @@
     (if (not (null pomodoro-notifier))
 	(funcall pomodoro-notifier "Emacs Pomodoro Timer" msg))
     #'(lambda()
-        (pomodoro-log-to-buffer message))))
+        (pomodoro-log-to-buffer msg))))
 
-(defun generic-cleanup-function()
-  "Called when a timer is up"
-  (setq pomodoro-task "")
-  (cancel-timer pomodoro-timer)
-  (setq pomodoro-timer nil))
 
 (defun pomodoro-start(task)
   (interactive "MTask Name:")
@@ -120,8 +124,9 @@
                                  pomodoro-custom-on-start-functions)
                            (cons (update-mode-line)
                                  pomodoro-custom-on-tick-functions)
-                           (append (list (update-mode-line)
-                                         (pomodoro-message (concat "Completed Task:" pomodoro-task)))
+                           (append (list #'(lambda()
+					     (pomodoro-message (concat "Pomodoro Completed for " pomodoro-task)))
+					 (update-mode-line))
                                    pomodoro-custom-on-complete-functions)))
 
 (defun pomodoro-break()
@@ -146,7 +151,7 @@
                                    pomodoro-custom-on-start-functions)
                            (cons (update-mode-line)
                                  pomodoro-custom-on-tick-functions)
-                           (append (list #'(lambda()(pomodoro-log-to-buffer "Completed Short Break"))
+                           (append (list #'(lambda()(pomodoro-message "Completed Short Break"))
                                          (update-mode-line))
                                    pomodoro-custom-on-complete-functions)))
 
@@ -162,7 +167,7 @@
                            (cons (update-mode-line)
                                  pomodoro-custom-on-tick-functions)
                            (append (list (update-mode-line)
-                                         #'(lambda()(pomodoro-log-to-buffer "Completed Long Break")))
+                                         #'(lambda()(pomodoro-message "Completed Long Break")))
                                    pomodoro-custom-on-complete-functions)))
 
 (defun update-mode-line()
